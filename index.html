@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Standy</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <style>
+        #app {
+            font-family: "Fira Code", Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #fff;
+            width: 100vw;
+            height: 100vh;
+            background-image: url("../background.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .content {
+            color: #fff;
+            max-width: 650px;
+            text-align: center;
+            position: relative;
+            height: 80vh;
+            padding: 70px;
+        }
+        .content > * {
+            text-shadow: 0px 1px 0px #8c8c8c;
+        }
+
+        .clock {
+            font-size: 70px;
+        }
+
+        h1 {
+            max-width: 650px;
+            font-size: 2.5rem;
+            text-align: center;
+            margin: auto;
+            margin-bottom: 70px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            text-align: center;
+            margin: auto;
+            max-width: 650px;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            text-align: center;
+            margin-bottom: 100px;
+            max-width: 650px;
+        }
+
+        p {
+            position: absolute;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            bottom: 30px;
+            max-width: 650px;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="app">
+        <div class="content">
+            <h1 v-text="message"></h1>
+            <h2 v-text="title"></h2>
+            <h3 v-text="description"></h2>
+            <div class="clock">
+                <span v-if="minutes < 10">0</span>{{ minutes }}:<span v-if="seconds < 10"
+                    >0</span
+                >{{ seconds }}
+            </div>
+            <p v-html="paragraph"></p>
+        </div>
+    </section>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                title: "Python Live Coding",
+                description: "",
+                paragraph: "",
+                minutes: 10,
+                seconds: 0,
+                elapsed: 0
+            },
+            async mounted() {
+                const resp = await axios.get('data.json')
+                this.title = resp.data.title
+                this.description = resp.data.description
+                this.paragraph = resp.data.paragraph
+                
+                const urlParams = new URLSearchParams(location.search);
+                const urlMinutes = urlParams.get("minutes");
+                this.minutes = Number(urlMinutes) || 10;
+                setInterval(this.countDown, 1000);
+            },
+            computed: {
+                message: function () {
+                    const urlParams = new URLSearchParams(location.search);
+                    const action = urlParams.get("action");
+                    switch (action) {
+                        case "be-right-back":
+                            return "Volto em instantes..."
+                        case "starting":
+                            return "A live já vai começar..."
+                        case "ending":
+                            return "A live está terminando..."
+                        default:
+                            return "Volto em instantes..."
+                    }
+                }
+            },
+            methods: {
+                countDown: function() {
+                    // Se minutos e segundos chegaram ao zero, retorna.
+                    if (this.minutes == 0 && this.seconds == 0) return;
+                    // Controla os segundos
+                    if (this.seconds == 0) {
+                        this.seconds = 59;
+                        this.minutes--;
+                    } else {
+                        this.seconds--;
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
